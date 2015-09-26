@@ -1,0 +1,7 @@
+consolecalculator.basicoperations.Plus
+consolecalculator.basicoperations.Minus
+consolecalculator.basicoperations.Multiplication
+consolecalculator.basicoperations.Division
+consolecalculator.basicoperations.Degree
+consolecalculator.basicoperations.Sqrt
+consolecalculator.functions.Average
