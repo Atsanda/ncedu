@@ -2,7 +2,7 @@ package ru.ncedu.java.tasks;
 interface a{
 	int b();
 }
-abstract class C a{}
+
 class A{
 	String x = "A";
 	public void get(){System.out.print("A " + x);}
