@@ -1,5 +1,5 @@
 <students>
-<student stdno = "1">
+<student stdno = "2">
     <lastname>Tsanda</lastname>
     <firstname>Artyom</firstname>
     <middlename>Pavlovich</middlename>
@@ -7,7 +7,7 @@
     <schlrshptype>increased</schlrshptype>
     <admissiondate>22.06.2013</admissiondate>
 </student>
-<student stdno = "2">
+<student stdno = "6">
     <lastname>Sobol</lastname>
     <firstname>Grigoriy</firstname>
     <middlename>Andreevich</middlename>

@@ -11,13 +11,17 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.LinkedList;
 
 /**
  * Created by artyom on 17.10.15.
  */
 public class ISXImpl implements ISX {
 
-    Document dataBase;
+    private Document dataBase;
+    private Deque<Integer> freeStdNum;//used for supplying uniqueness of identifiers
 
     public ISXImpl() throws ParserConfigurationException, SAXException, IOException{
         File xmlFile = new File("University.xml");
@@ -25,6 +29,36 @@ public class ISXImpl implements ISX {
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         dataBase = dBuilder.parse(xmlFile);
         dataBase.getDocumentElement().normalize();
+
+        freeStdNum = new LinkedList<Integer>();
+
+        Element root = (Element) dataBase.getElementsByTagName("students").item(0);
+        NodeList nodeList = root.getChildNodes();
+
+        int tmpStdNum = -1;
+
+        for(int j=1,tmpNodeInd = 0;;) {
+            if(tmpNodeInd == nodeList.getLength()){
+                freeStdNum.add(tmpStdNum+1);
+                break;
+            }
+
+            Node node = nodeList.item(tmpNodeInd);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+                tmpStdNum = Integer.parseInt(element.getAttribute("stdno"));
+                if(tmpStdNum == j){
+                    tmpNodeInd++;
+                    j++;
+                }
+                if(tmpStdNum > j) {
+                    freeStdNum.add(j);
+                    j++;
+                }
+            }else {
+                tmpNodeInd++;
+            }
+        }
     }
 
     @Override
@@ -74,7 +108,7 @@ public class ISXImpl implements ISX {
     }
 
     @Override
-    public void add(String toBeAdded) {
+    public void add(String[] atributes) {
 
     }
 

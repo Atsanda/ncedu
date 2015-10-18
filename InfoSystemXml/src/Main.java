@@ -8,7 +8,7 @@ import java.io.IOException;
  */
 public class Main {
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException {
-        ISX tst = new ISXImpl();
+        ISXImpl tst = new ISXImpl();
         tst.print();
     }
 }

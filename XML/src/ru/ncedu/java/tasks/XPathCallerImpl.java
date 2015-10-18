@@ -130,9 +130,9 @@ public class XPathCallerImpl implements  XPathCaller {
 
         String expression;
         if(docType.equals("emp-hier"))
-            expression = "//employee[@empno = '" + empno + "']/ancestor::*[1]/child::employee";
+            expression = "//employee[@empno = '" + empno + "']/ancestor::*[1]/child::employee[@empno != '" + empno + "']";
         else
-            expression = "//employee[@mgr = //employee[@empno = //employee[@empno = '" + empno + "']/@mgr]/@empno]";
+            expression = "//employee[@mgr = //employee[@empno = //employee[@empno = '" + empno + "']/@mgr]/@empno and @empno != '" + empno + "']";
 
         NodeList nodeList = null;
 
@@ -145,17 +145,17 @@ public class XPathCallerImpl implements  XPathCaller {
         return conversion(nodeList);
     }
 
-    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document document = builder.parse(new FileInputStream("./src/emp.xml"));
-
-        XPathCaller tst = new XPathCallerImpl();
-        Element[] ret = tst.getCoworkers(document, "7521","emp");
-
-        for(Element i: ret)
-            System.out.println(i.getAttribute("empno"));
-        System.out.println(tst.getHighestPayed(document,"10","olol"));
-
-    }
+//    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
+//        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+//        DocumentBuilder builder = builderFactory.newDocumentBuilder();
+//        Document document = builder.parse(new FileInputStream("./src/emp.xml"));
+//
+//        XPathCaller tst = new XPathCallerImpl();
+//        Element[] ret = tst.getCoworkers(document, "7521","emp");
+//
+//        for(Element i: ret)
+//            System.out.println(i.getAttribute("empno"));
+//        System.out.println(tst.getHighestPayed(document,"10","olol"));
+//
+//    }
 }

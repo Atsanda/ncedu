@@ -24,9 +24,9 @@ public interface ISX {
 
     /**
      * Parses string and adds new object to data base.
-     * @param toBeAdded
+     * @param atributes
      */
-    void add(String toBeAdded);
+    void add(String[] atributes);
 
     /**
      * Delets goven object from data base and outputs the results of last find function.
