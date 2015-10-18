@@ -1,18 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <students>
-<student stdno = "2">
+<student stdno="2">
     <lastname>Tsanda</lastname>
     <firstname>Artyom</firstname>
     <middlename>Pavlovich</middlename>
     <groupnum>317</groupnum>
     <schlrshptype>increased</schlrshptype>
     <admissiondate>22.06.2013</admissiondate>
-</student>
-<student stdno = "6">
+ </student>
+<student stdno="6">
     <lastname>Sobol</lastname>
     <firstname>Grigoriy</firstname>
     <middlename>Andreevich</middlename>
     <groupnum>316</groupnum>
     <schlrshptype>normal</schlrshptype>
     <admissiondate>30.06.2013</admissiondate>
-</student>
+ </student>
+<student stdno="1">
+    <lastname>Харичкин</lastname>
+    <firstname>Никита</firstname>
+    <middlename>Евгеньевич</middlename>
+    <groupnum>315</groupnum>
+    <schlrshptype>none</schlrshptype>
+    <admissiondate>25.07.2013</admissiondate>
+  </student>
 </students>

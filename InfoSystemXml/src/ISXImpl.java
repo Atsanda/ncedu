@@ -1,11 +1,6 @@
-import org.w3c.dom.Document;
-import org.w3c.dom.DocumentType;
-import org.w3c.dom.Entity;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Element;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -14,30 +9,39 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.OutputKeys;
 
 /**
  * Created by artyom on 17.10.15.
  */
 public class ISXImpl implements ISX {
 
+    private DocumentBuilder dBuilder;
     private Document dataBase;
+    private Element root;
     private Deque<Integer> freeStdNum;//used for supplying uniqueness of identifiers
 
     public ISXImpl() throws ParserConfigurationException, SAXException, IOException{
         File xmlFile = new File("University.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        dBuilder = dbFactory.newDocumentBuilder();
         dataBase = dBuilder.parse(xmlFile);
         dataBase.getDocumentElement().normalize();
 
         freeStdNum = new LinkedList<Integer>();
 
-        Element root = (Element) dataBase.getElementsByTagName("students").item(0);
+        root = (Element) dataBase.getElementsByTagName("students").item(0);
         NodeList nodeList = root.getChildNodes();
 
-        int tmpStdNum = -1;
-
-        for(int j=1,tmpNodeInd = 0;;) {
+        for(int j=1,tmpNodeInd = 0,tmpStdNum = -1;;) {
             if(tmpNodeInd == nodeList.getLength()){
                 freeStdNum.add(tmpStdNum+1);
                 break;
@@ -61,9 +65,15 @@ public class ISXImpl implements ISX {
         }
     }
 
+    private Integer getStdtId(){
+        int ret = freeStdNum.getFirst();
+        if(freeStdNum.isEmpty())
+            freeStdNum.add(ret+1);
+        return new Integer(ret);
+    }
+
     @Override
     public void print() {
-        Element root = (Element) dataBase.getElementsByTagName("students").item(0);
         NodeList nodeList = root.getChildNodes();
 
         String stdno;
@@ -108,8 +118,71 @@ public class ISXImpl implements ISX {
     }
 
     @Override
-    public void add(String[] atributes) {
+    public void add(String[] atributes) throws IllegalArgumentException, TransformerException, IOException, SAXException {
+        if(!isValid(atributes))
+            throw new IllegalArgumentException();
+        //!TODO trst wether exists
+        Element student = dataBase.createElement("student");
+        Attr attr = dataBase.createAttribute("stdno");
+        attr.setValue(getStdtId().toString());
+        student.setAttributeNode(attr);
+        root.appendChild(student);
 
+
+
+        Element lastname = dataBase.createElement("lastname");
+        lastname.appendChild(dataBase.createTextNode(atributes[0]));
+        student.appendChild(lastname);
+
+        Element firstname = dataBase.createElement("firstname");
+        firstname.appendChild(dataBase.createTextNode(atributes[1]));
+        student.appendChild(firstname);
+
+        Element middlename = dataBase.createElement("middlename");
+        middlename.appendChild(dataBase.createTextNode(atributes[2]));
+        student.appendChild(middlename);
+
+        Element groupnum = dataBase.createElement("groupnum");
+        groupnum.appendChild(dataBase.createTextNode(atributes[3]));
+        student.appendChild(groupnum);
+
+        Element schlrshptype = dataBase.createElement("schlrshptype");
+        schlrshptype.appendChild(dataBase.createTextNode(atributes[4]));
+        student.appendChild(schlrshptype);
+
+        Element admissiondate = dataBase.createElement("admissiondate");
+        admissiondate.appendChild(dataBase.createTextNode(atributes[5]));
+        student.appendChild(admissiondate);
+
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        DOMSource source = new DOMSource(dataBase);
+        File xmlFile = new File("University.xml");
+        StreamResult result = new StreamResult(xmlFile);
+
+        transformer.transform(source, result);
+
+        dataBase = dBuilder.parse(xmlFile);
+        dataBase.getDocumentElement().normalize();
+        root = (Element) dataBase.getElementsByTagName("students").item(0);
+    }
+
+    /**
+     * Checks whether string array of attributes is valid
+     * @param atributes
+     */
+    private boolean isValid(String[] atributes){
+        if(atributes.length != 6) {
+            return false;
+        }
+        return  atributes[0].matches("^\\p{javaUpperCase}\\p{javaLowerCase}*( \\p{IsAlphabetic}+)*")    && // Kim chen is valid for eg
+                atributes[1].matches("^\\p{javaUpperCase}\\p{javaLowerCase}*( \\p{IsAlphabetic}+)*")    &&
+                atributes[2].matches("^\\p{javaUpperCase}\\p{javaLowerCase}*( \\p{IsAlphabetic}+)*")    &&
+                atributes[3].matches("^[\\p{IsAlphabetic}0-9]+")                                        &&
+                atributes[4].matches("^(increased)|(normal)|(none)")                                    &&
+                atributes[5].matches("^(0?[1-9]|[12][0-9]|3[01])\\.(0?[1-9]|1[012])\\.((19|20)\\d\\d)");//must be dd.mm.yyyy bad implemention !TODO
     }
 
     @Override

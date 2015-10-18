@@ -1,3 +1,9 @@
+import org.xml.sax.SAXException;
+
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
+
 /**
  * This is console application, which provides with interface of university students data base manipulation through XML.
  * @author Tsanda Artyom
@@ -26,7 +32,7 @@ public interface ISX {
      * Parses string and adds new object to data base.
      * @param atributes
      */
-    void add(String[] atributes);
+    void add(String[] atributes) throws TransformerException, IOException, SAXException;
 
     /**
      * Delets goven object from data base and outputs the results of last find function.
