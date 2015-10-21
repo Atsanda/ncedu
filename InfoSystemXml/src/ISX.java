@@ -23,10 +23,11 @@ public interface ISX {
 
     /**
      * Edits attribute of given object.
-     * @param object
+     * @param id
      * @param attribute
+     * @param value
      */
-    void edit(String object, String attribute);
+    void edit(String id, String attribute, String value) throws TransformerException, IOException, SAXException;
 
     /**
      * Parses string and adds new object to data base.

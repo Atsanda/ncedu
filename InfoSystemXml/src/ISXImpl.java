@@ -29,6 +29,7 @@ public class ISXImpl implements ISX {
     private Document dataBase;
     private Element root;
     private Deque<Integer> freeStdNum;//used for supplying uniqueness of identifiers
+    private String lastFind = "*";
 
     public ISXImpl() throws ParserConfigurationException, SAXException, IOException{
         File xmlFile = new File("University.xml");
@@ -123,10 +124,55 @@ public class ISXImpl implements ISX {
                 System.out.format("|%5s|%10s|%10s|%12s|%5s|%12s|%13s|\n",stdno,lastname,firstname,middlename,groupnum,schlrshptype,admissiondate);
             }
         }
+
+        lastFind = toBeFound;
     }
 
     @Override
-    public void edit(String object, String attribute) {
+    public void edit(String id, String attribute, String value) throws IllegalArgumentException, TransformerException, IOException, SAXException {
+        if(id == null || attribute == null || value == null)
+            throw new IllegalArgumentException("Invalid arguments for edit function");
+
+        NodeList nodeList = root.getChildNodes();
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+
+            if (node.getNodeType() == Node.ELEMENT_NODE ) {
+                Element element = (Element) node;
+
+                String stdno = element.getAttribute("stdno");
+                if(stdno.equals(id)) {
+                    element.getElementsByTagName(attribute).item(0).setTextContent(value);
+
+                    String[] toBeChecked = {
+                            element.getElementsByTagName("lastname").item(0).getTextContent(),
+                            element.getElementsByTagName("firstname").item(0).getTextContent(),
+                            element.getElementsByTagName("middlename").item(0).getTextContent(),
+                            element.getElementsByTagName("groupnum").item(0).getTextContent(),
+                            element.getElementsByTagName("schlrshptype").item(0).getTextContent(),
+                            element.getElementsByTagName("admissiondate").item(0).getTextContent()
+                    };
+
+                    if (!isValid(toBeChecked))
+                        throw new IllegalArgumentException("Invalid arguments for edit function");
+
+                    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                    Transformer transformer = transformerFactory.newTransformer();
+                    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+                    DOMSource source = new DOMSource(dataBase);
+                    File xmlFile = new File("University.xml");
+                    StreamResult result = new StreamResult(xmlFile);
+
+                    transformer.transform(source, result);
+
+                    dataBase = dBuilder.parse(xmlFile);
+                    dataBase.getDocumentElement().normalize();
+                    root = (Element) dataBase.getElementsByTagName("students").item(0);
+                }
+            }
+        }
 
     }
 
@@ -180,6 +226,8 @@ public class ISXImpl implements ISX {
         dataBase = dBuilder.parse(xmlFile);
         dataBase.getDocumentElement().normalize();
         root = (Element) dataBase.getElementsByTagName("students").item(0);
+
+        find(lastFind);
     }
 
     /**
