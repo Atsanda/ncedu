@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.transform.Transformer;
@@ -36,33 +37,38 @@ public class ISXImpl implements ISX {
         dataBase = dBuilder.parse(xmlFile);
         dataBase.getDocumentElement().normalize();
 
-        freeStdNum = new LinkedList<Integer>();
-
         root = (Element) dataBase.getElementsByTagName("students").item(0);
         NodeList nodeList = root.getChildNodes();
 
-        for(int j=1,tmpNodeInd = 0,tmpStdNum = -1;;) {
-            if(tmpNodeInd == nodeList.getLength()){
-                freeStdNum.add(tmpStdNum+1);
-                break;
-            }
+        freeStdNum = getFreeStdNum(nodeList);
+    }
 
-            Node node = nodeList.item(tmpNodeInd);
-            if (node.getNodeType() == Node.ELEMENT_NODE) {
+    private Deque<Integer> getFreeStdNum(NodeList nodeList){
+        TreeSet<Integer> usedStdNum = new TreeSet<Integer>();
+        Deque<Integer> unusedStdNum = new LinkedList<Integer>();
+        int stdNum;
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+
+            if (node.getNodeType() == Node.ELEMENT_NODE ) {
                 Element element = (Element) node;
-                tmpStdNum = Integer.parseInt(element.getAttribute("stdno"));
-                if(tmpStdNum == j){
-                    tmpNodeInd++;
-                    j++;
-                }
-                if(tmpStdNum > j) {
-                    freeStdNum.add(j);
-                    j++;
-                }
-            }else {
-                tmpNodeInd++;
+                stdNum = new Integer(element.getAttribute("stdno"));
+                usedStdNum.add(stdNum);
             }
         }
+
+        for(int i=1;i<10;i++){
+            if(usedStdNum.isEmpty()) {
+                unusedStdNum.add(i);
+                break;
+            }else if(!usedStdNum.first().equals(new Integer(i))){
+                unusedStdNum.add(i);
+            }else{
+                usedStdNum.pollFirst();
+            }
+        }
+
+        return unusedStdNum;
     }
 
     private Integer getStdtId(){
@@ -74,6 +80,15 @@ public class ISXImpl implements ISX {
 
     @Override
     public void print() {
+        find("*");
+    }
+
+    @Override
+    public void find(String toBeFound) {
+        if(toBeFound == null)
+            return;
+        toBeFound = (toBeFound.equals("*"))?(".*"):toBeFound;
+
         NodeList nodeList = root.getChildNodes();
 
         String stdno;
@@ -95,6 +110,10 @@ public class ISXImpl implements ISX {
 
                 stdno           = element.getAttribute("stdno");
                 lastname        = element.getElementsByTagName("lastname"       ).item(0).getTextContent();
+                if(!lastname.matches(".*" + toBeFound + ".*")){
+                    continue;
+                }
+
                 firstname       = element.getElementsByTagName("firstname"      ).item(0).getTextContent();
                 middlename      = element.getElementsByTagName("middlename"     ).item(0).getTextContent();
                 groupnum        = element.getElementsByTagName("groupnum"       ).item(0).getTextContent();
@@ -104,12 +123,6 @@ public class ISXImpl implements ISX {
                 System.out.format("|%5s|%10s|%10s|%12s|%5s|%12s|%13s|\n",stdno,lastname,firstname,middlename,groupnum,schlrshptype,admissiondate);
             }
         }
-
-    }
-
-    @Override
-    public void find(String toBeFound) {
-
     }
 
     @Override

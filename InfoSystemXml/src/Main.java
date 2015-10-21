@@ -10,10 +10,14 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, TransformerException {
         ISXImpl tst = new ISXImpl();
-        tst.print();
+        //tst.print();
 
         String[] lol = {"Харичкин","Никита","Евгеньевич","315","none","25.07.2013"};
-        tst.add(lol);
+        //System.out.println(tst.freeStdNum);
+        //tst.find("Tsanda");
+        //tst.add(lol);
+        //tst.print();
+        //tst.find("Sob");
         tst.print();
     }
 }

@@ -16,8 +16,8 @@ public interface ISX {
     void print();
 
     /**
-     * Outputs data base which lines contains toBeFound string.
-     * @param toBeFound
+     * Outputs those students whose last_name contains toBeFound string.
+     * @param toBeFound substing, in case of * outputs the hole table
      */
     void find(String toBeFound);
 
