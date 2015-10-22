@@ -19,6 +19,8 @@ public class Main {
         //tst.print();
         //tst.find("Sob");
         tst.print();
-        tst.edit("1","groupnum","314");
+        //tst.edit("1","groupnum","314");
+        tst.delete("1");
+        tst.print();
     }
 }

@@ -247,7 +247,36 @@ public class ISXImpl implements ISX {
     }
 
     @Override
-    public void delete(String toBeDeleted) {
+    public void delete(String id) throws IllegalArgumentException, TransformerException, IOException, SAXException {
+        if(id == null)
+            throw new IllegalArgumentException();
 
+        NodeList nodeList = root.getChildNodes();
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+
+                String stdno = element.getAttribute("stdno");
+                if (stdno.equals(id)) {
+                    root.removeChild(element);
+                }
+            }
+        }
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        DOMSource source = new DOMSource(dataBase);
+        File xmlFile = new File("University.xml");
+        StreamResult result = new StreamResult(xmlFile);
+
+        transformer.transform(source, result);
+
+        dataBase = dBuilder.parcse(xmlFile);
+        dataBase.getDocumentElement().normalize();
+        root = (Element) dataBase.getElementsByTagName("students").item(0);
     }
 }

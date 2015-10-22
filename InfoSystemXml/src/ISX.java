@@ -37,7 +37,7 @@ public interface ISX {
 
     /**
      * Delets goven object from data base and outputs the results of last find function.
-     * @param toBeDeleted
+     * @param id
      */
-    void delete(String toBeDeleted);
+    void delete(String id) throws TransformerException, IOException, SAXException;
 }
