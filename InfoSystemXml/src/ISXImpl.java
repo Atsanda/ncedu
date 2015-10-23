@@ -1,3 +1,5 @@
+//Bad practice #1: lacking package. Default package is bad.
+//Bad practice #2: don't import classes with package.name.*
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -32,6 +34,10 @@ public class ISXImpl implements ISX {
     private String lastFind = "*";
 
     public ISXImpl() throws ParserConfigurationException, SAXException, IOException{
+    /*
+        Make this class more universal. Create a constructor which receives absolute path to the 
+    database-file and use it instead of hardcoded "University.xml"
+    */
         File xmlFile = new File("University.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dBuilder = dbFactory.newDocumentBuilder();
@@ -188,7 +194,16 @@ public class ISXImpl implements ISX {
         root.appendChild(student);
 
 
-
+    /*
+        The following 20 lines are doing the same thing. So it would be more effective if you create
+    a map of attributes and then go through this list in order to avoid reproducing code.
+    Having 5 attributes this approach is solvable, but annoying. Imagine having 100 attributes, which are changing every 
+    month. You'll suffer from such approach.
+    What do I mean: create configurational map like Map<Integer,String> with contents:
+    Integer.valueOf(0) : "lastname";
+    Integer.valueOf(1) : "firstName"; and so on
+    Configuration of the database can be contained in separate XML-file :)
+    */
         Element lastname = dataBase.createElement("lastname");
         lastname.appendChild(dataBase.createTextNode(atributes[0]));
         student.appendChild(lastname);
@@ -216,6 +231,11 @@ public class ISXImpl implements ISX {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        /*
+            It's a bad practice to contain strings inside code. It's better to create 
+        private String field in the beginning of the class, or also put string into XML-config
+        of the project.
+        */
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
         DOMSource source = new DOMSource(dataBase);
         File xmlFile = new File("University.xml");
