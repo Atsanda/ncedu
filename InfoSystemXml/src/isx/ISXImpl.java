@@ -9,22 +9,20 @@ import org.w3c.dom.Attr;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.OutputKeys;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.LinkedList;
-import java.util.Set    ;
+
+
 
 
 /**
@@ -37,9 +35,7 @@ public class ISXImpl implements ISX {
     private Element root;
     private Deque<Integer> freeStdNum;//used for supplying uniqueness of identifiers
     private String lastFind = "*";
-    private Map attributes = new HashMap< Integer, String>();
     private DataBaseProperties properties;
-    private String outputFormat;
 
     public ISXImpl() throws Exception {
         this(new DataBaseProperties());
@@ -57,13 +53,6 @@ public class ISXImpl implements ISX {
         NodeList nodeList = root.getChildNodes();
 
         freeStdNum = getFreeStdNum(nodeList);
-
-        outputFormat = "%5s|";
-        for(int i=0; i < properties.ATTRIBUTES.length; i++){
-            outputFormat += "%" + properties.ATTRIBUTES[i].getMaxLenth() + "s|";
-            attributes.put(Integer.valueOf(i), properties.ATTRIBUTES[i].getName());
-        }
-        outputFormat += "\n";
     }
 
     private Deque<Integer> getFreeStdNum(NodeList nodeList){
@@ -114,12 +103,7 @@ public class ISXImpl implements ISX {
         toBeFound = (toBeFound.equals("*"))?(".*"):toBeFound;
 
         NodeList nodeList = root.getChildNodes();
-
-        String id;
-        String attr[] = new String[attributes.size()];
-
-        System.out.format(outputFormat,"id","lastname","firstname","middlename","grp N","schlrshptype","admissiondate");
-        System.out.format(outputFormat,"-----","----------","----------","------------","-----","------------","-------------");
+        printHeader();
 
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
@@ -127,21 +111,13 @@ public class ISXImpl implements ISX {
             if (node.getNodeType() == Node.ELEMENT_NODE ) {
                 Element element = (Element) node;
 
-                id = element.getAttribute("id");
+                String id = element.getAttribute("id");
                 String searchAttrVal = element.getElementsByTagName(properties.SEARCH_UNIT_NAME).item(0).getTextContent();
                 if(!searchAttrVal.matches(".*" + toBeFound + ".*")){
                     continue;
                 }
 
-                for (Map.Entry entry : (Set<Map.Entry>) attributes.entrySet()) {
-                    int num = ((Integer) entry.getKey()).intValue();
-                    if(num == 0) {
-                        continue;
-                    }
-                    attr[num] = element.getElementsByTagName((String) entry.getValue()).item(0).getTextContent();
-                }
-
-                System.out.format(outputFormat,id,searchAttrVal,attr[1],attr[2],attr[3],attr[4],attr[5]);
+                printUnit(element);
             }
         }
 
@@ -263,5 +239,39 @@ public class ISXImpl implements ISX {
         }
 
         saveChanges();
+    }
+
+    private void printUnit(Element e){
+        String unitId = e.getAttribute("id");
+        System.out.format("%5s|",unitId);
+
+        for(int i=0; i < properties.ATTRIBUTES.length; i++){
+            String attrFormat = "%" + properties.ATTRIBUTES[i].getMaxLenth() + "s|";
+            String attr = e.getElementsByTagName(properties.ATTRIBUTES[i].getName()).item(0).getTextContent();
+            System.out.format(attrFormat, attr);
+        }
+        System.out.println();
+    }
+
+    private void printHeader(){
+        System.out.format("%5s|","id");
+
+        for(int i=0; i < properties.ATTRIBUTES.length; i++){
+            String attrFormat = "%" + properties.ATTRIBUTES[i].getMaxLenth() + "s|";
+            System.out.format(attrFormat, properties.ATTRIBUTES[i].getName());
+        }
+        System.out.println();
+
+        System.out.format("%5s|","-----");
+        for(int i=0; i < properties.ATTRIBUTES.length; i++){
+            int attrLenght = properties.ATTRIBUTES[i].getMaxLenth();
+            String attrFormat = "%" + attrLenght + "s|";
+            StringBuffer filler = new StringBuffer();
+            for(int j=0; j<attrLenght; j++) {
+                filler.append('-');
+            }
+            System.out.format(attrFormat,filler.toString());
+        }
+        System.out.println();
     }
 }

@@ -24,7 +24,7 @@
             </attribute>
             <attribute>
                 <name>groupnum</name>
-                <max_lenght>5</max_lenght>
+                <max_lenght>8</max_lenght>
                 <check_rgx>^[\p{IsAlphabetic}0-9]+</check_rgx>
             </attribute>
             <attribute>
