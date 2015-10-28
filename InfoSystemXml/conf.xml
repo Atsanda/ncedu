@@ -1,0 +1,53 @@
+<database>
+    <name>University</name>
+    <path>University.xml</path>
+    <dataname>students</dataname>
+    <unit>
+        <name>student</name>
+        <attributes>
+            <number>6</number>
+            <attribute>
+                <name>lastname</name>
+                <max_lenght>10</max_lenght>
+                <check_rgx>^\p{javaUpperCase}\p{javaLowerCase}*( \p{IsAlphabetic}+)*</check_rgx>
+            </attribute>
+            <attribute>
+                <name>firstname</name>
+                <max_lenght>10</max_lenght>
+                <check_rgx>^\p{javaUpperCase}\p{javaLowerCase}*( \p{IsAlphabetic}+)*</check_rgx>
+            </attribute>
+            <attribute>
+                <name>middlename</name>
+                <max_lenght>12</max_lenght>
+                <check_rgx>^\p{javaUpperCase}\p{javaLowerCase}*( \p{IsAlphabetic}+)*</check_rgx>
+            </attribute>
+            <attribute>
+                <name>groupnum</name>
+                <max_lenght>5</max_lenght>
+                <check_rgx>^[\p{IsAlphabetic}0-9]+</check_rgx>
+            </attribute>
+            <attribute>
+                <name>schlrshptype</name>
+                <max_lenght>12</max_lenght>
+                <check_rgx>^(increased)|(normal)|(none)</check_rgx>
+            </attribute>
+            <attribute>
+                <name>admissiondate</name>
+                <max_lenght>13</max_lenght>
+                <check_rgx>^(0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[012])\.((19|20)\d\d)</check_rgx>
+            </attribute>
+        </attributes>
+    </unit>
+
+    <outputpropetries>
+        <outputproperty>
+            <key>indent</key>
+            <value>yes</value>
+        </outputproperty>
+        <outputproperty>
+            <key>{http://xml.apache.org/xslt}indent-amount</key>
+            <value>2</value>
+        </outputproperty>
+    </outputpropetries>
+
+</database>

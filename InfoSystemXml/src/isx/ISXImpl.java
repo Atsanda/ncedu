@@ -1,24 +1,31 @@
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
+package isx;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Attr;
+
+import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.OutputKeys;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeSet;
+import java.util.LinkedList;
+import java.util.Set    ;
+
 
 /**
  * Created by artyom on 17.10.15.
@@ -30,6 +37,7 @@ public class ISXImpl implements ISX {
     private Element root;
     private Deque<Integer> freeStdNum;//used for supplying uniqueness of identifiers
     private String lastFind = "*";
+    private Map attributes = new HashMap< Integer, String>();
 
     public ISXImpl() throws ParserConfigurationException, SAXException, IOException{
         File xmlFile = new File("University.xml");
@@ -42,6 +50,13 @@ public class ISXImpl implements ISX {
         NodeList nodeList = root.getChildNodes();
 
         freeStdNum = getFreeStdNum(nodeList);
+
+        attributes.put(Integer.valueOf(0),"lastname");
+        attributes.put(Integer.valueOf(1),"firstname");
+        attributes.put(Integer.valueOf(2),"middlename");
+        attributes.put(Integer.valueOf(3),"groupnum");
+        attributes.put(Integer.valueOf(4),"schlrshptype");
+        attributes.put(Integer.valueOf(5),"admissiondate");
     }
 
     private Deque<Integer> getFreeStdNum(NodeList nodeList){
@@ -58,7 +73,7 @@ public class ISXImpl implements ISX {
             }
         }
 
-        for(int i=1;i<10;i++){
+        for(int i=1;;i++){
             if(usedStdNum.isEmpty()) {
                 unusedStdNum.add(i);
                 break;
@@ -73,6 +88,7 @@ public class ISXImpl implements ISX {
     }
 
     private Integer getStdtId(){
+        System.out.println(freeStdNum);
         int ret = freeStdNum.getFirst();
         if(freeStdNum.isEmpty())
             freeStdNum.add(ret+1);
@@ -93,12 +109,7 @@ public class ISXImpl implements ISX {
         NodeList nodeList = root.getChildNodes();
 
         String stdno;
-        String lastname;
-        String firstname;
-        String middlename;
-        String groupnum;
-        String schlrshptype;
-        String admissiondate;
+        String attr[] = new String[attributes.size()];
 
         System.out.format("|%5s|%10s|%10s|%12s|%5s|%12s|%13s|\n","stdno","lastname","firstname","middlename","grp N","schlrshptype","admissiondate");
         System.out.format("|%5s|%10s|%10s|%12s|%5s|%12s|%13s|\n","-----","----------","----------","------------","-----","------------","-------------");
@@ -110,18 +121,20 @@ public class ISXImpl implements ISX {
                 Element element = (Element) node;
 
                 stdno           = element.getAttribute("stdno");
-                lastname        = element.getElementsByTagName("lastname"       ).item(0).getTextContent();
+                String lastname        = element.getElementsByTagName("lastname"       ).item(0).getTextContent();
                 if(!lastname.matches(".*" + toBeFound + ".*")){
                     continue;
                 }
 
-                firstname       = element.getElementsByTagName("firstname"      ).item(0).getTextContent();
-                middlename      = element.getElementsByTagName("middlename"     ).item(0).getTextContent();
-                groupnum        = element.getElementsByTagName("groupnum"       ).item(0).getTextContent();
-                schlrshptype    = element.getElementsByTagName("schlrshptype"   ).item(0).getTextContent();
-                admissiondate   = element.getElementsByTagName("admissiondate"  ).item(0).getTextContent();
+                for (Map.Entry entry : (Set<Map.Entry>) attributes.entrySet()) {
+                    int num = ((Integer) entry.getKey()).intValue();
+                    if(num == 0) {
+                        continue;
+                    }
+                    attr[num] = element.getElementsByTagName((String) entry.getValue()).item(0).getTextContent();
+                }
 
-                System.out.format("|%5s|%10s|%10s|%12s|%5s|%12s|%13s|\n",stdno,lastname,firstname,middlename,groupnum,schlrshptype,admissiondate);
+                System.out.format("|%5s|%10s|%10s|%12s|%5s|%12s|%13s|\n",stdno,lastname,attr[1],attr[2],attr[3],attr[4],attr[5]);
             }
         }
 
@@ -145,74 +158,23 @@ public class ISXImpl implements ISX {
                 if(stdno.equals(id)) {
                     element.getElementsByTagName(attribute).item(0).setTextContent(value);
 
-                    String[] toBeChecked = {
-                            element.getElementsByTagName("lastname").item(0).getTextContent(),
-                            element.getElementsByTagName("firstname").item(0).getTextContent(),
-                            element.getElementsByTagName("middlename").item(0).getTextContent(),
-                            element.getElementsByTagName("groupnum").item(0).getTextContent(),
-                            element.getElementsByTagName("schlrshptype").item(0).getTextContent(),
-                            element.getElementsByTagName("admissiondate").item(0).getTextContent()
-                    };
+                    String[] toBeChecked = new String[attributes.size()];
+                    for (Map.Entry entry : (Set<Map.Entry>) attributes.entrySet()) {
+                        int num = ((Integer) entry.getKey()).intValue();
+                        toBeChecked[num] = element.getElementsByTagName((String) entry.getValue()).item(0).getTextContent();
+                    }
 
                     if (!isValid(toBeChecked))
                         throw new IllegalArgumentException("Invalid arguments for edit function");
 
-                    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                    Transformer transformer = transformerFactory.newTransformer();
-                    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-                    DOMSource source = new DOMSource(dataBase);
-                    File xmlFile = new File("University.xml");
-                    StreamResult result = new StreamResult(xmlFile);
-
-                    transformer.transform(source, result);
-
-                    dataBase = dBuilder.parse(xmlFile);
-                    dataBase.getDocumentElement().normalize();
-                    root = (Element) dataBase.getElementsByTagName("students").item(0);
+                    saveChanges();
                 }
             }
         }
 
     }
 
-    @Override
-    public void add(String[] atributes) throws IllegalArgumentException, TransformerException, IOException, SAXException {
-        if(!isValid(atributes))
-            throw new IllegalArgumentException();
-        //!TODO trst wether exists
-        Element student = dataBase.createElement("student");
-        Attr attr = dataBase.createAttribute("stdno");
-        attr.setValue(getStdtId().toString());
-        student.setAttributeNode(attr);
-        root.appendChild(student);
-
-
-
-        Element lastname = dataBase.createElement("lastname");
-        lastname.appendChild(dataBase.createTextNode(atributes[0]));
-        student.appendChild(lastname);
-
-        Element firstname = dataBase.createElement("firstname");
-        firstname.appendChild(dataBase.createTextNode(atributes[1]));
-        student.appendChild(firstname);
-
-        Element middlename = dataBase.createElement("middlename");
-        middlename.appendChild(dataBase.createTextNode(atributes[2]));
-        student.appendChild(middlename);
-
-        Element groupnum = dataBase.createElement("groupnum");
-        groupnum.appendChild(dataBase.createTextNode(atributes[3]));
-        student.appendChild(groupnum);
-
-        Element schlrshptype = dataBase.createElement("schlrshptype");
-        schlrshptype.appendChild(dataBase.createTextNode(atributes[4]));
-        student.appendChild(schlrshptype);
-
-        Element admissiondate = dataBase.createElement("admissiondate");
-        admissiondate.appendChild(dataBase.createTextNode(atributes[5]));
-        student.appendChild(admissiondate);
-
+    private void saveChanges() throws TransformerException, IOException, SAXException{
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -226,12 +188,35 @@ public class ISXImpl implements ISX {
         dataBase = dBuilder.parse(xmlFile);
         dataBase.getDocumentElement().normalize();
         root = (Element) dataBase.getElementsByTagName("students").item(0);
+    }
+
+    @Override
+    public void add(String[] newAttributes) throws IllegalArgumentException, TransformerException, IOException, SAXException {
+        if(!isValid(newAttributes))
+            throw new IllegalArgumentException();
+        //!TODO trst wether exists
+
+        Element student = dataBase.createElement("student");
+        Attr attr = dataBase.createAttribute("stdno");
+        attr.setValue(getStdtId().toString());
+        student.setAttributeNode(attr);
+        root.appendChild(student);
+
+
+        for (Map.Entry entry : (Set<Map.Entry>) attributes.entrySet()) {
+            Element element = dataBase.createElement((String) entry.getValue());
+            int i = ((Integer) entry.getKey()).intValue();
+            element.appendChild(dataBase.createTextNode(newAttributes[i]));
+            student.appendChild(element);
+        }
+
+        saveChanges();
 
         find(lastFind);
     }
 
     /**
-     * Checks whether string array of attributes is valid
+     * Checks whether string array of ATTRIBUTES is valid
      * @param atributes
      */
     private boolean isValid(String[] atributes){
@@ -265,18 +250,7 @@ public class ISXImpl implements ISX {
                 }
             }
         }
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-        DOMSource source = new DOMSource(dataBase);
-        File xmlFile = new File("University.xml");
-        StreamResult result = new StreamResult(xmlFile);
 
-        transformer.transform(source, result);
-
-        dataBase = dBuilder.parcse(xmlFile);
-        dataBase.getDocumentElement().normalize();
-        root = (Element) dataBase.getElementsByTagName("students").item(0);
+        saveChanges();
     }
 }
