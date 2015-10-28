@@ -11,22 +11,22 @@ import java.io.IOException;
  */
 public class Main {
     public static void main(String[] args) throws Exception {
-        //ISXImpl tst = new ISXImpl();
+        ISXImpl tst = new ISXImpl();
         //tst.print();
 
-        //String[] lol = {"Харичкин","Никита","Евгеньевич","315","none","25.07.2013"};
+        String[] lol = {"Харичкин","Никита","Евгеньевич","315","none","25.07.2013"};
         //System.out.println(tst.freeStdNum);
         //tst.find("Tsanda");
         //tst.add(lol);
         //tst.add(lol);
         //tst.print();
-        //tst.find("Sob");
+        tst.find("Sob");
         //tst.print();
         //tst.edit("1","groupnum","314");
         //tst.delete("3");
         //tst.print();
 
-        DataBaseProperties test  = new DataBaseProperties();
-        test.printDataBaseProperties();
+        //DataBaseProperties test  = new DataBaseProperties();
+        //test.printDataBaseProperties();
     }
 }

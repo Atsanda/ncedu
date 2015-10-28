@@ -20,6 +20,7 @@ public class DataBaseProperties {
     public final String DATABASE_PATH;
     public final String DATA_NAME;
     public final String UNIT_NAME;
+    public final String SEARCH_UNIT_NAME;
     public final Attribute[] ATTRIBUTES;
     public final Map<String,String> OUTPUT_PROPERTIES;
     
@@ -44,6 +45,7 @@ public class DataBaseProperties {
         DATA_NAME = setDataName(dataBase);
         UNIT_NAME = setUnitName(dataBase);
         ATTRIBUTES = setAttributes(dataBase);
+        SEARCH_UNIT_NAME = ATTRIBUTES[searchUnitNum(dataBase) - 1].getName();
         OUTPUT_PROPERTIES = setOutputProperties(dataBase);
     }
 
@@ -82,14 +84,13 @@ public class DataBaseProperties {
                 if(element.getNodeName().equals("number")){
                     int num = Integer.parseInt(element.getTextContent());
                     attributez = new Attribute[num];
-                    System.out.println(num);
                 }else if(element.getNodeName().equals("attribute")){
                     attributez[j] = new Attribute();
                     attributez[j].setName(element.getElementsByTagName("name").item(0).getTextContent());
                     attributez[j].setMaxLenth(Integer.parseInt(element.getElementsByTagName("max_lenght").item(0).getTextContent()));
                     attributez[j].setCheckRgx(element.getElementsByTagName("check_rgx").item(0).getTextContent());
                     j++;
-                }else{
+                }else if(!element.getNodeName().equals("search_attribute")){
                     throw new Exception("Problem with configuration file");
                 }
             }
@@ -123,6 +124,13 @@ public class DataBaseProperties {
         }
 
         return outputPropertiez;
+    }
+
+    private int searchUnitNum(Document dataBase) {
+        Element e;
+        e = (Element) dataBase.getElementsByTagName("attributes").item(0);
+        e = (Element) e.getElementsByTagName("search_attribute").item(0);
+        return Integer.parseInt(e.getTextContent());
     }
 
     public void printDataBaseProperties(){

@@ -6,6 +6,7 @@
         <name>student</name>
         <attributes>
             <number>6</number>
+            <search_attribute>1</search_attribute>
             <attribute>
                 <name>lastname</name>
                 <max_lenght>10</max_lenght>
