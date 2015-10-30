@@ -148,6 +148,6 @@ public class DataBaseProperties {
         for(Attribute attr: ATTRIBUTES){
             System.out.format("\t%" + nameFieldLenth + "s%s", attr.getName(),"\t" + attr.getMaxLenth() + "\t\t\t" + attr.getCheckRgx() + "\n");
         }
-        System.out.print("===========================================================================================");
+        System.out.print("===========================================================================================\n\n");
     }
 }

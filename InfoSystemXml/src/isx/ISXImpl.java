@@ -181,8 +181,25 @@ public class ISXImpl implements ISX {
     @Override
     public void add(String[] newAttributes) throws IllegalArgumentException, TransformerException, IOException, SAXException {
         if(!isValid(newAttributes))
-            throw new IllegalArgumentException();
-        //!TODO trst wether exists
+            throw new IllegalArgumentException("Invalid attributes");
+        // uniqueness test
+        NodeList nodeList = root.getChildNodes();
+        boolean res = true;
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+
+            if (node.getNodeType() == Node.ELEMENT_NODE ) {
+                Element element = (Element) node;
+
+                for(int j=0; j < properties.ATTRIBUTES.length; j++) {
+                    res &= newAttributes[j].equals(element.getElementsByTagName(properties.ATTRIBUTES[j].getName()).item(0).getTextContent());
+                }
+                if(res == true){
+                    throw new IllegalArgumentException("Element already exists");
+                }
+                res = true;
+            }
+        }
 
         Element unit = dataBase.createElement(properties.UNIT_NAME);
         Attr id = dataBase.createAttribute("id");
@@ -213,7 +230,7 @@ public class ISXImpl implements ISX {
         boolean result = true;
 
         for(int i=0; i < properties.ATTRIBUTES.length; i++){
-            result |= atributes[i].matches(properties.ATTRIBUTES[i].getCheckRgx());
+            result &= atributes[i].matches(properties.ATTRIBUTES[i].getCheckRgx());
         }
         return result;
     }
@@ -239,6 +256,18 @@ public class ISXImpl implements ISX {
         }
 
         saveChanges();
+    }
+
+    @Override
+    public void help() {
+        System.out.println("Welcome to xml based data base!\nCommand list:");
+        System.out.format("%-10s%-10s%-10s%-10s%-35s\n", "print", "", "", "", "Outputs data base into console");
+        System.out.format("%-10s%-10s%-10s%-10s%-35s\n", "find", "string", "", "", "Outputs those students whose last_name contains toBeFound string");
+        System.out.format("%-10s%-10s%-10s%-10s%-35s\n", "edit", "id", "attribute", "value", "Edits attribute of given object");
+        System.out.format("%-10s%-10s%-10s%-10s%-35s\n", "add", "attributes", "", "", "Adds new object to data base");
+        System.out.format("%-10s%-10s%-10s%-10s%-35s\n", "delete", "id", "", "", "Deletes object with specified id from data base");
+        System.out.println("Data base properties:");
+        properties.printDataBaseProperties();
     }
 
     private void printUnit(Element e){

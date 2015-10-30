@@ -30,14 +30,19 @@ public interface ISX {
     void edit(String id, String attribute, String value) throws TransformerException, IOException, SAXException;
 
     /**
-     * Parses string and adds new object to data base.
+     * Adds new object to data base.
      * @param atributes
      */
     void add(String[] atributes) throws TransformerException, IOException, SAXException;
 
     /**
-     * Delets goven object from data base and outputs the results of last find function.
+     * Delets given object from data base and outputs the results of last find function.
      * @param id
      */
     void delete(String id) throws TransformerException, IOException, SAXException;
+
+    /*
+     * Prints help information
+     */
+    void help();
 }
